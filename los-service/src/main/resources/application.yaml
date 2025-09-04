@@ -1,0 +1,53 @@
+# los-service/src/main/resources/application.yaml
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/los}
+    username: ${SPRING_DATASOURCE_USERNAME:los}
+    password: ${SPRING_DATASOURCE_PASSWORD:los}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.show_sql: false
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    consumer:
+      group-id: los-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+app:
+  ledgerBaseUrl: ${LEDGER_BASE_URL:http://ledger-service:8090}
+
+# Chaos Monkey Configuration
+chaos:
+  monkey:
+    enabled: true
+    watcher:
+      controller: true
+      rest-controller: true
+      service: true
+      repository: true
+    assaults:
+      level: 5  # 50% chance of assault
+      latency-active: true
+      latency-range-start: 2000
+      latency-range-end: 5000
+      exceptions-active: true
+      kill-application-active: false
+      memory-active: false
+
+# Management endpoints
+management:
+  endpoint:
+    chaosmonkey:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,chaosmonkey
